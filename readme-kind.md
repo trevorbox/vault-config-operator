@@ -1,5 +1,7 @@
 # kind integration testing
 
+> TODO: remove this since we can just use make now
+
 > [kind](https://kind.sigs.k8s.io/)
 
 ## create kind cluster
