@@ -1,3 +1,6 @@
+//go:build !integration
+// +build !integration
+
 /*
 Copyright 2021.
 
@@ -19,8 +22,6 @@ package controllers
 import (
 	"path/filepath"
 	"testing"
-
-	"net/http"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -54,23 +55,6 @@ func TestAPIs(t *testing.T) {
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
-<<<<<<< HEAD
-=======
-	ctx, cancel = context.WithCancel(context.TODO())
-
-	Expect(os.Setenv("USE_EXISTING_CLUSTER", "true")).To(Succeed())
-
-	_, isSet := os.LookupEnv("VAULT_ADDR")
-	if !isSet {
-		Expect(os.Setenv("VAULT_ADDR", "http://localhost:8200")).To(Succeed())
-	}
-
-	Expect(os.Getenv("ACCESSOR")).ToNot(BeEmpty())
-
-	_, err := http.Get(os.Getenv("VAULT_ADDR"))
-	Expect(err).To(BeNil())
-
->>>>>>> 2544a63 (more robust integration tests)
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "config", "crd", "bases")},
@@ -80,45 +64,6 @@ var _ = BeforeSuite(func() {
 	cfg, err := testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
 
 	err = redhatcopv1alpha1.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
