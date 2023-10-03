@@ -339,7 +339,7 @@ The following example allows for running a debugger using the Vault instance cre
             ],
             "env": {
                 "ENABLE_WEBHOOKS": "false",
-                "VAULT_ADDR": "http://localhost:8081",
+                "VAULT_ADDR": "http://localhost:8200",
             }
         }
     ]

@@ -2,10 +2,10 @@ CHART_REPO_URL ?= http://example.com
 HELM_REPO_DEST ?= /tmp/gh-pages
 OPERATOR_NAME ?=$(shell basename -z `pwd`)
 HELM_VERSION ?= v3.11.0
-KIND_VERSION ?= v0.17.0
+KIND_VERSION ?= v0.20.0
 KUBECTL_VERSION ?= v1.25.3
 K8S_MAJOR_VERSION ?= 1.25
-VAULT_VERSION ?= 1.12.2
+VAULT_VERSION ?= 1.14.0
 
 
 # VERSION defines the project version for the bundle.
@@ -61,7 +61,7 @@ IMG ?= controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
-ENVTEST_K8S_VERSION ?= 1.26.0
+ENVTEST_K8S_VERSION ?= 1.25.0
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -121,13 +121,13 @@ test: manifests generate fmt vet envtest ## Run tests.
 .PHONY: integration
 integration: kind-setup deploy-vault deploy-ingress vault manifests generate fmt vet envtest ## Run tests.
 	export VAULT_TOKEN=$$($(KUBECTL) get secret vault-init -n vault -o jsonpath='{.data.root_token}' | base64 -d) ;\
-	export VAULT_ADDR="http://localhost:8081" ;\
+	export VAULT_ADDR="http://localhost:8200" ;\
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out --tags=integration
 
 .PHONY: deploy-ingress
 deploy-ingress: kubectl helm
 	$(HELM) upgrade -i ingress-nginx ./integration/helm/ingress-nginx -n vault --atomic --create-namespace
-	curl https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml | $(KUBECTL) create -f - -n ingress-nginx
+	curl https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/kind/deploy.yaml | $(KUBECTL) create -f - -n ingress-nginx
 	$(KUBECTL) rollout status deployment ingress-nginx-controller -n ingress-nginx -w
 	$(KUBECTL) wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
 
@@ -136,7 +136,7 @@ deploy-vault: kubectl helm
 	$(KUBECTL) create namespace vault --dry-run=client -o yaml | kubectl apply -f - 
 	$(KUBECTL) apply -f ./integration/rolebinding-admin.yaml -n vault
 	$(HELM) repo add hashicorp https://helm.releases.hashicorp.com
-	$(HELM) upgrade vault hashicorp/vault -i --create-namespace -n vault --atomic -f ./integration/vault-values.yaml
+	$(HELM) upgrade vault hashicorp/vault -i --version 0.25.0 --create-namespace -n vault --atomic -f ./integration/vault-values.yaml
 	$(KUBECTL) wait --for=condition=ready pod/vault-0 -n vault --timeout=5m
 
 .PHONY: kind-setup
@@ -215,6 +215,7 @@ $(LOCALBIN):
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
+KIND ?= $(LOCALBIN)/kind
 
 KUSTOMIZE_VERSION ?= v3.8.7
 CONTROLLER_TOOLS_VERSION ?= v0.10.0
@@ -351,15 +352,9 @@ helmchart-clean:
 	rm -rf ./charts
 
 .PHONY: kind
-KIND = ./bin/kind
-kind: ## Download kind locally if necessary.
-ifeq (,$(wildcard $(KIND)))
-ifeq (,$(shell which kind 2>/dev/null))
-	$(call go-get-tool,$(KIND),sigs.k8s.io/kind@${KIND_VERSION})
-else
-KIND = $(shell which kind)
-endif
-endif
+kind: $(KIND) ## Download kind locally if necessary.
+$(KIND): $(LOCALBIN)
+	test -s $(LOCALBIN)/kind || GOBIN=$(LOCALBIN) go install sigs.k8s.io/kind@${KIND_VERSION}
 
 .PHONY: kubectl
 KUBECTL = ./bin/kubectl
