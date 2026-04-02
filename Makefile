@@ -399,8 +399,8 @@ helmchart-test: kind-setup deploy-vault helmchart
 	  --set image.tag=${HELM_TEST_IMG_TAG} \
 	  --set env[0].name=VAULT_ADDR \
 	  --set env[0].value=http://vault.vault.svc:8200
-	$(KUBECTL) wait --namespace ${OPERATOR_NAME}-local --for=condition=ready pod --selector=app.kubernetes.io/name=${OPERATOR_NAME} --timeout=90s || kubectl get pods -A && kubectl logs -n ${OPERATOR_NAME}-local deploy/${OPERATOR_NAME}-local --all-containers && exit 1
-	$(KUBECTL) wait --namespace default --for=condition=ready pod prometheus-kube-prometheus-stack-prometheus-0 --timeout=180s || kubectl get pods -A && kubectl logs -n default statefulset/prometheus-kube-prometheus-stack-prometheus --all-containers && exit 1
+	$(KUBECTL) wait --namespace ${OPERATOR_NAME}-local --for=condition=ready pod --selector=app.kubernetes.io/name=${OPERATOR_NAME} --timeout=90s || $(KUBECTL) get pods -A && $(KUBECTL) logs -n ${OPERATOR_NAME}-local deploy/${OPERATOR_NAME}-local --all-containers && exit 1
+	$(KUBECTL) wait --namespace default --for=condition=ready pod prometheus-kube-prometheus-stack-prometheus-0 --timeout=180s || $(KUBECTL) get pods -A && $(KUBECTL) logs -n default statefulset/prometheus-kube-prometheus-stack-prometheus --all-containers && exit 1
 	$(KUBECTL) exec prometheus-kube-prometheus-stack-prometheus-0 -n default -c test-metrics -- /bin/sh -c "echo 'Example metrics...' && cat /tmp/ready"
 
 .PHONY: helmchart-clean
