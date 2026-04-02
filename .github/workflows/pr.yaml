@@ -9,7 +9,7 @@ on:
       kubectl-wait-timeout:
         description: "kubectl wait timeout used for integration and helmchart-test targets in the Makefile (e.g. 5m)"
         required: false
-        default: "20m"
+        default: "1m"
 
 jobs:
   shared-operator-workflow:
