@@ -1,4 +1,4 @@
-KUBECTL_WAIT_TIMEOUT ?= 10m
+KUBECTL_WAIT_TIMEOUT ?= 5m
 CHART_REPO_URL ?= http://example.com
 HELM_REPO_DEST ?= /tmp/gh-pages
 OPERATOR_NAME ?=$(shell basename -z `pwd`)
